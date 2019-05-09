@@ -14,15 +14,29 @@ def get_fact():
     soup = BeautifulSoup(response.content, "html.parser")
     facts = soup.find_all("div", id="content")
 
-    return facts[0].getText()
+    return facts[0].getText().strip()
 
 
 @app.route('/')
 def home():
-    return "FILL ME!"
+    fact = get_fact()
+    output = """
+        <p>
+            <b>Fact: </b>{fact}
+            <a href="/">refresh</a>
+        </p>
+        <a href="{url}">{url}</a>
+    """
+    payload = {'input_text': fact}
+
+    response = requests.post('http://hidden-journey-62459.herokuapp.com/piglatinize/',
+                             data=payload,
+                             allow_redirects=False)
+
+    return output.format(fact=fact,
+                         url=response.headers['Location'])
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 6787))
     app.run(host='0.0.0.0', port=port)
-
